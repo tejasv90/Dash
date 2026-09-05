@@ -3,28 +3,48 @@
 <head>
     <meta charset="UTF-8">
 
-    <title>My Website</title>
+    <title>Dashboards by Tejas</title>
 
     <!-- iPhone Home Screen icon -->
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icon.png">
 
-    <!-- General favicon -->
-    <link rel="icon" type="image/png" href="icon.png">
+    <!-- Browser favicon -->
+    <link rel="icon" type="image/png" href="./icon.png">
 
-    <!-- iOS web-app settings -->
+    <!-- iOS web app settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="My Website">
+    <meta name="apple-mobile-web-app-title" content="Dashboards by Tejas">
 
-    <!-- Redirect to Google Sites -->
-    <meta http-equiv="refresh" content="0; url=https://sites.google.com/view/dashboardsbytejas/dash">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 60px;
+        }
+
+        img {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+        }
+    </style>
 </head>
 
 <body>
+
+    <img src="./icon.png" alt="Dashboards by Tejas">
+
+    <h2>Dashboards by Tejas</h2>
+
     <p>Opening website...</p>
 
     <script>
-        window.location.href = "https://sites.google.com/view/dashboardsbytejas/dash";
+        setTimeout(function () {
+            window.location.href =
+                "https://sites.google.com/view/dashboardsbytejas/dash";
+        }, 5000);
     </script>
+
 </body>
 </html>
