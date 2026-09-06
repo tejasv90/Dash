@@ -7,20 +7,14 @@
 
     <title>Dashboards by Tejas</title>
 
-    <!-- ========================================= -->
-    <!-- iPhone / iPad Home Screen Icon            -->
-    <!-- ========================================= -->
-
+    <!-- iPhone / iPad Home Screen Icon -->
     <link
         rel="apple-touch-icon"
         sizes="180x180"
         href="https://tejasv90.github.io/Dash/apple-touch-icon.png?v=2"
     >
 
-    <!-- ========================================= -->
-    <!-- Browser Favicon                           -->
-    <!-- ========================================= -->
-
+    <!-- Browser Favicon -->
     <link
         rel="icon"
         type="image/png"
@@ -28,19 +22,13 @@
         href="https://tejasv90.github.io/Dash/apple-touch-icon.png?v=2"
     >
 
-    <!-- ========================================= -->
-    <!-- Web App Manifest                           -->
-    <!-- ========================================= -->
-
+    <!-- Web App Manifest -->
     <link
         rel="manifest"
         href="https://tejasv90.github.io/Dash/manifest.json?v=2"
     >
 
-    <!-- ========================================= -->
-    <!-- iOS Web App Settings                     -->
-    <!-- ========================================= -->
-
+    <!-- iOS Web App Settings -->
     <meta
         name="apple-mobile-web-app-capable"
         content="yes"
@@ -122,7 +110,6 @@
 
     <div class="container">
 
-        <!-- Your logo -->
         <img
             class="logo"
             src="https://tejasv90.github.io/Dash/apple-touch-icon.png?v=2"
@@ -131,16 +118,29 @@
 
         <h1>Dashboards by Tejas</h1>
 
-        <p>Welcome to my dashboard.</p>
-
-        <a
-            class="button"
-            href="https://sites.google.com/view/dashboardsbytejas/dash"
-        >
-            Open Dashboard
-        </a>
+        <p>Opening dashboard...</p>
 
     </div>
+
+
+    <!-- ========================================= -->
+    <!-- Redirect after page has loaded            -->
+    <!-- ========================================= -->
+
+    <script>
+
+        window.addEventListener("load", function () {
+
+            setTimeout(function () {
+
+                window.location.href =
+                    "https://sites.google.com/view/dashboardsbytejas/dash";
+
+            }, 1000);
+
+        });
+
+    </script>
 
 </body>
 </html>
