@@ -1,17 +1,17 @@
 {
-  "name": "Dashboards by Tejas",
-  "short_name": "Dashboards",
-  "id": "/",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
-  "icons": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    }
-  ]
+    "name": "Dashboards by Tejas",
+    "short_name": "Dashboards",
+    "id": "/Dash/",
+    "start_url": "/Dash/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+        {
+            "src": "https://tejasv90.github.io/Dash/icon-512.png?v=2",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
 }
