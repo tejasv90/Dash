@@ -1,67 +1,665 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Expense Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for tables */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 
-    <title>Dashboards by Tejas</title>
+    <!-- iPhone / iPad Home Screen + Standalone Web App -->
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
 
-    <!-- iPhone Home Screen Icon -->
-    <link
-        rel="apple-touch-icon"
-        sizes="180x180"
-        href="https://tejasv90.github.io/Dash/apple-touch-icon.png?v=2"
-    >
+    <link rel="manifest" href="./manifest.json">
 
-    <!-- Favicon -->
-    <link
-        rel="icon"
-        type="image/png"
-        href="https://tejasv90.github.io/Dash/apple-touch-icon.png?v=2"
-    >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Dashboards">
 
-    <!-- Manifest -->
-    <link
-        rel="manifest"
-        href="https://tejasv90.github.io/Dash/manifest.json?v=2"
-    >
-
-    <!-- iOS Web App -->
-    <meta
-        name="apple-mobile-web-app-capable"
-        content="yes"
-    >
-
-    <meta
-        name="apple-mobile-web-app-status-bar-style"
-        content="default"
-    >
-
-    <meta
-        name="apple-mobile-web-app-title"
-        content="Dashboards"
-    >
-
-    <!-- AUTOMATIC REDIRECT -->
-    <meta
-        http-equiv="refresh"
-        content="0;url=https://sites.google.com/view/dashboardsbytejas/dash"
-    >
+    <!-- Standard browser icon -->
+    <link rel="icon" type="image/png" href="./apple-touch-icon.png">
 
 </head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-<body>
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-sm">
+                    <i class="fa-solid fa-wallet text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Expense Tracker</h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">Google Sheets Live Sync (INR ₹)</p>
+                </div>
+            </div>
 
-    <p>Opening Dashboards...</p>
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <span id="last-updated" class="text-[10px] sm:text-xs text-slate-400 hidden md:inline">Syncing...</span>
+                <button onclick="openConfigModal()" class="inline-flex items-center px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors" title="Settings / Sheet URL">
+                    <i class="fa-solid fa-gear sm:mr-1.5"></i>
+                    <span class="hidden sm:inline">Settings</span>
+                </button>
+                <button onclick="loadSheetData()" id="refresh-btn" class="inline-flex items-center px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs transition-all">
+                    <i class="fa-solid fa-rotate-right mr-1.5" id="refresh-icon"></i>
+                    Refresh Data
+                </button>
+            </div>
+        </div>
+    </header>
 
-    <p>
-        If you are not redirected automatically,
-        <a href="https://sites.google.com/view/dashboardsbytejas/dash">
-            click here
-        </a>.
-    </p>
+    <main class="flex-1 max-w-7xl w-full mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-6 pb-12 space-y-4 sm:space-y-6">
 
+        <!-- Filters & Controls Bar -->
+        <section class="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-200 shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                <!-- Month Selector -->
+                <div class="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+                    <i class="fa-regular fa-calendar text-indigo-600 text-xs"></i>
+                    <label for="month-select" class="text-xs font-medium text-slate-600">Month:</label>
+                    <select id="month-select" onchange="onMonthChange()" class="bg-transparent text-xs font-semibold text-slate-900 focus:outline-none cursor-pointer">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+                    <i class="fa-solid fa-tag text-indigo-600 text-xs"></i>
+                    <label for="category-select" class="text-xs font-medium text-slate-600">Category:</label>
+                    <select id="category-select" onchange="applyFilters()" class="bg-transparent text-xs font-semibold text-slate-900 focus:outline-none cursor-pointer max-w-[110px] sm:max-w-none">
+                        <option value="ALL">All Categories</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <!-- Search box -->
+                <div class="relative flex-1 md:w-64">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="search-input" oninput="applyFilters()" placeholder="Search remarks..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+                </div>
+                <button onclick="resetFilters()" class="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors whitespace-nowrap">
+                    Reset
+                </button>
+            </div>
+        </section>
+
+        <!-- Scorecards Section -->
+        <section class="grid grid-cols-2 gap-3 sm:gap-4">
+            <!-- Current Month Scorecard -->
+            <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span id="card-curr-label" class="text-xs sm:text-sm font-bold text-indigo-600 truncate">Current Month</span>
+                    <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                        <i class="fa-solid fa-coins text-xs sm:text-sm"></i>
+                    </div>
+                </div>
+                <div>
+                    <h2 id="card-curr-amount" class="text-lg sm:text-3xl font-extrabold text-slate-900 tracking-tight">₹0.00</h2>
+                    <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Total spend for selected category/month</p>
+                </div>
+            </div>
+
+            <!-- Previous Month Scorecard -->
+            <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span id="card-prev-label" class="text-xs sm:text-sm font-bold text-slate-600 truncate">Previous Month</span>
+                    <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">
+                        <i class="fa-solid fa-clock-rotate-left text-xs sm:text-sm"></i>
+                    </div>
+                </div>
+                <div>
+                    <h2 id="card-prev-amount" class="text-lg sm:text-3xl font-extrabold text-slate-900 tracking-tight">₹0.00</h2>
+                    <p class="text-[10px] sm:text-xs text-slate-500 mt-1">Total spend for comparison month</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="p-3 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h3 class="text-xs sm:text-base font-bold text-slate-900">Category Comparison</h3>
+                    <p class="text-[9px] sm:text-xs text-slate-500">Comparing <span id="table-curr-label" class="font-semibold text-slate-700">-</span> vs <span id="table-prev-label" class="font-semibold text-slate-700">-</span></p>
+                </div>
+                <span class="text-[9px] sm:text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 bg-indigo-50 text-indigo-700 rounded-full">Monthly Breakdown</span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-[10px] sm:text-sm whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-slate-50/70 border-b border-slate-200 text-slate-500 text-[9px] sm:text-xs uppercase tracking-wider font-semibold">
+                            <th class="px-2 py-2 sm:px-6 sm:py-3.5">Category</th>
+                            <th id="th-curr-month" class="px-2 py-2 sm:px-6 sm:py-3.5 text-right">Current</th>
+                            <th id="th-prev-month" class="px-2 py-2 sm:px-6 sm:py-3.5 text-right">Previous</th>
+                            <th class="px-2 py-2 sm:px-6 sm:py-3.5 text-right">% Change</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-table-body" class="divide-y divide-slate-100 text-slate-700">
+                        <tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">Loading category data...</td></tr>
+                    </tbody>
+                    <tfoot id="comparison-table-foot" class="bg-slate-50/80 border-t border-slate-200 font-semibold text-slate-900">
+                        <!-- Total row inserted dynamically -->
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm sm:text-base font-bold text-slate-900">Transaction History</h3>
+                </div>
+                <span id="tx-count-badge" class="text-[10px] sm:text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full">0 tx</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs sm:text-sm whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-slate-50/70 border-b border-slate-200 text-slate-500 text-[10px] sm:text-xs uppercase tracking-wider font-semibold">
+                            <th class="px-3 py-2.5 sm:px-6 sm:py-3.5 w-24 sm:w-36 align-top">Date</th>
+                            <th class="px-3 py-2.5 sm:px-6 sm:py-3.5 w-28 sm:w-44 align-top">Category</th>
+                            <th class="px-3 py-2.5 sm:px-6 sm:py-3.5 text-right w-24 sm:w-32 align-top">Amount</th>
+                            <th class="px-4 py-2.5 sm:px-6 sm:py-3.5 align-top">Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-table-body" class="divide-y divide-slate-100 text-slate-700">
+                        <tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">No transactions loaded.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-auto bg-white border-t border-slate-200 py-8 pb-40 sm:pb-16 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
+        &copy;Dashboards by Tejas 2026
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="config-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900">Dashboard Settings</h3>
+                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-500">Configure your published Google Sheet CSV URL below.</p>
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Published CSV URL</label>
+                <input type="text" id="sheet-url-input" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeConfigModal()" class="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancel</button>
+                <button onclick="saveConfig()" class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-xs">Save & Reload</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let DEFAULT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBaArVHaD6eK8eIi_4TmDkT5zXN8RpVkIBmLvTiBkNYpWwoGmnNMjT_J2rSUdjI9xssp8f0KT9tw47/pub?output=csv";
+        
+        let rawTransactions = [];
+        let filteredTransactions = [];
+        let availableMonths = [];
+        let selectedMonth = '';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUrl = localStorage.getItem('expense_sheet_url');
+            if (savedUrl) {
+                DEFAULT_CSV_URL = savedUrl;
+            }
+            document.getElementById('sheet-url-input').value = DEFAULT_CSV_URL;
+            loadSheetData();
+        });
+
+        function openConfigModal() {
+            document.getElementById('config-modal').classList.remove('hidden');
+        }
+
+        function closeConfigModal() {
+            document.getElementById('config-modal').classList.add('hidden');
+        }
+
+        function saveConfig() {
+            const urlInput = document.getElementById('sheet-url-input').value.trim();
+            if (urlInput) {
+                DEFAULT_CSV_URL = urlInput;
+                localStorage.setItem('expense_sheet_url', DEFAULT_CSV_URL);
+                closeConfigModal();
+                loadSheetData();
+            }
+        }
+
+        async function loadSheetData() {
+            const refreshIcon = document.getElementById('refresh-icon');
+            refreshIcon.classList.add('fa-spin');
+            document.getElementById('last-updated').textContent = 'Refreshing...';
+
+            try {
+                const cacheBuster = `&_cb=${Date.now()}&_r=${Math.random()}&_nc=1`;
+                let fetchUrl = DEFAULT_CSV_URL;
+                if (!fetchUrl.includes('output=csv')) {
+                    if (fetchUrl.includes('pubhtml')) {
+                        fetchUrl = fetchUrl.replace('pubhtml', 'pub?output=csv');
+                    } else if (!fetchUrl.includes('pub?')) {
+                        fetchUrl += (fetchUrl.includes('?') ? '&' : '?') + 'output=csv';
+                    }
+                }
+                const finalUrl = fetchUrl + cacheBuster;
+
+                const response = await fetch(finalUrl, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const csvText = await response.text();
+
+                parseCSV(csvText);
+                initMonthDropdown();
+                initCategoryDropdown();
+                applyFilters();
+
+                const now = new Date();
+                document.getElementById('last-updated').textContent = `Updated: ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            } catch (error) {
+                console.error("Error loading CSV:", error);
+                document.getElementById('last-updated').textContent = 'Sync failed';
+                document.getElementById('comparison-table-body').innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-rose-500">Failed to load data. Please check your published CSV URL in settings.</td></tr>`;
+            } finally {
+                refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        function parseCSV(text) {
+            const lines = text.split(/\r\n|\n/);
+            rawTransactions = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const row = parseCSVRow(line);
+                if (row.length < 4) continue;
+
+                const dateStr = (row[0] || '').trim();
+                const category = (row[2] || 'Uncategorized').trim();
+                const amountRaw = (row[3] || '0').trim();
+                const remarks = (row[4] || '').trim();
+
+                const parsedDate = parseDDMMYYYY(dateStr);
+                const amount = parseAmount(amountRaw);
+
+                if (!parsedDate) continue;
+
+                const year = parsedDate.getFullYear();
+                const month = parsedDate.getMonth() + 1;
+                const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+
+                const dayFormatted = String(parsedDate.getDate()).padStart(2, '0');
+                const monthShort = parsedDate.toLocaleString('default', { month: 'short' });
+                const dateFormattedFull = `${dayFormatted} ${monthShort} ${year}`;
+
+                rawTransactions.push({
+                    date: parsedDate,
+                    dateFormattedFull: dateFormattedFull,
+                    yearMonth: yearMonth,
+                    category: category || 'Uncategorized',
+                    amount: isNaN(amount) ? 0 : amount,
+                    remarks: remarks
+                });
+            }
+
+            rawTransactions.sort((a, b) => b.date - a.date);
+        }
+
+        function parseCSVRow(text) {
+            let result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result.map(item => item.replace(/^"|"$/g, '').trim());
+        }
+
+        function parseDDMMYYYY(dateStr) {
+            if (!dateStr) return null;
+            let clean = dateStr.replace(/[^0-9]/g, '');
+            if (clean.length === 8) {
+                let d = parseInt(clean.substring(0, 2), 10);
+                let m = parseInt(clean.substring(2, 4), 10) - 1;
+                let y = parseInt(clean.substring(4, 8), 10);
+                let dateObj = new Date(y, m, d);
+                if (!isNaN(dateObj.getTime())) return dateObj;
+            }
+            let fallback = new Date(dateStr);
+            return isNaN(fallback.getTime()) ? null : fallback;
+        }
+
+        function parseAmount(amtStr) {
+            if (!amtStr) return 0;
+            let clean = amtStr.replace(/[^0-9.\-]/g, '');
+            let val = parseFloat(clean);
+            return isNaN(val) ? 0 : val;
+        }
+
+        function formatCurrency(num) {
+            return '₹' + num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function initMonthDropdown() {
+            const monthSet = new Set(rawTransactions.map(t => t.yearMonth));
+            availableMonths = Array.from(monthSet).sort().reverse();
+
+            const select = document.getElementById('month-select');
+            select.innerHTML = '';
+
+            if (availableMonths.length === 0) {
+                select.innerHTML = `<option value="">No months found</option>`;
+                selectedMonth = '';
+                return;
+            }
+
+            availableMonths.forEach(ym => {
+                const opt = document.createElement('option');
+                opt.value = ym;
+                opt.textContent = formatYearMonthLabel(ym);
+                select.appendChild(opt);
+            });
+
+            if (!selectedMonth || !availableMonths.includes(selectedMonth)) {
+                selectedMonth = availableMonths[0];
+            }
+            select.value = selectedMonth;
+        }
+
+        function formatYearMonthLabel(ym) {
+            const [y, m] = ym.split('-');
+            const date = new Date(parseInt(y), parseInt(m) - 1, 1);
+            return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        }
+
+        function initCategoryDropdown() {
+            const catSet = new Set(rawTransactions.map(t => t.category).filter(c => c.toLowerCase() !== 'uncategorized'));
+            const categories = Array.from(catSet).sort();
+
+            const select = document.getElementById('category-select');
+            const currentVal = select.value;
+            select.innerHTML = `<option value="ALL">All Categories</option>`;
+
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            });
+
+            if (categories.includes(currentVal)) {
+                select.value = currentVal;
+            } else {
+                select.value = 'ALL';
+            }
+        }
+
+        function onMonthChange() {
+            selectedMonth = document.getElementById('month-select').value;
+            applyFilters();
+        }
+
+        function resetFilters() {
+            document.getElementById('category-select').value = 'ALL';
+            document.getElementById('search-input').value = '';
+            if (availableMonths.length > 0) {
+                selectedMonth = availableMonths[0];
+                document.getElementById('month-select').value = selectedMonth;
+            }
+            applyFilters();
+        }
+
+        function applyFilters() {
+            selectedMonth = document.getElementById('month-select').value;
+            const selectedCategory = document.getElementById('category-select').value;
+            const searchQuery = document.getElementById('search-input').value.toLowerCase();
+
+            filteredTransactions = rawTransactions.filter(t => {
+                const matchesMonth = (!selectedMonth || t.yearMonth === selectedMonth);
+                const matchesCategory = (selectedCategory === 'ALL' || t.category === selectedCategory);
+                const matchesSearch = (!searchQuery || t.remarks.toLowerCase().includes(searchQuery) || t.category.toLowerCase().includes(searchQuery));
+                return matchesMonth && matchesCategory && matchesSearch;
+            });
+
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            if (!selectedMonth) return;
+
+            const [y, m] = selectedMonth.split('-').map(Number);
+            const prevDate = new Date(y, m - 2, 1);
+            const prevYear = prevDate.getFullYear();
+            const prevMonthNum = prevDate.getMonth() + 1;
+            const prevMonthKey = `${prevYear}-${String(prevMonthNum).padStart(2, '0')}`;
+
+            const currLabel = formatYearMonthLabel(selectedMonth);
+            const prevLabel = formatYearMonthLabel(prevMonthKey);
+
+            document.getElementById('card-curr-label').textContent = currLabel;
+            document.getElementById('card-prev-label').textContent = prevLabel;
+
+            const selectedCategory = document.getElementById('category-select').value;
+            
+            const currMonthAll = rawTransactions.filter(t => t.yearMonth === selectedMonth);
+            const prevMonthAll = rawTransactions.filter(t => t.yearMonth === prevMonthKey);
+
+            const currTotal = currMonthAll
+                .filter(t => selectedCategory === 'ALL' || t.category === selectedCategory)
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            const prevTotal = prevMonthAll
+                .filter(t => selectedCategory === 'ALL' || t.category === selectedCategory)
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            document.getElementById('card-curr-amount').textContent = formatCurrency(currTotal);
+            document.getElementById('card-prev-amount').textContent = formatCurrency(prevTotal);
+
+            renderComparisonTable(selectedMonth, prevMonthKey, currLabel, prevLabel);
+            renderTransactionsTable();
+        }
+
+        function renderComparisonTable(currMonthKey, prevMonthKey, currLabel, prevLabel) {
+            document.getElementById('th-curr-month').textContent = currLabel;
+            document.getElementById('th-prev-month').textContent = prevLabel;
+            document.getElementById('table-curr-label').textContent = currLabel;
+            document.getElementById('table-prev-label').textContent = prevLabel;
+
+            const currTransactions = rawTransactions.filter(t => t.yearMonth === currMonthKey);
+            const prevTransactions = rawTransactions.filter(t => t.yearMonth === prevMonthKey);
+
+            // Exclude 'Uncategorized' from comparison table
+            const categories = Array.from(new Set([
+                ...currTransactions.map(t => t.category),
+                ...prevTransactions.map(t => t.category)
+            ])).filter(c => c.toLowerCase() !== 'uncategorized');
+
+            let categoryRows = [];
+            let totalCurr = 0;
+            let totalPrev = 0;
+
+            categories.forEach(cat => {
+                const currSum = currTransactions.filter(t => t.category === cat).reduce((s, t) => s + t.amount, 0);
+                const prevSum = prevTransactions.filter(t => t.category === cat).reduce((s, t) => s + t.amount, 0);
+                
+                totalCurr += currSum;
+                totalPrev += prevSum;
+
+                const absChange = currSum - prevSum;
+                let pctChange = 0;
+                if (prevSum > 0) {
+                    pctChange = (absChange / prevSum) * 100;
+                } else if (currSum > 0) {
+                    pctChange = 100;
+                }
+
+                categoryRows.push({
+                    category: cat,
+                    curr: currSum,
+                    prev: prevSum,
+                    pctChange: pctChange
+                });
+            });
+
+            // Requested custom category order
+            const customOrder = [
+                'Food',
+                'Grocery',
+                'Shopping/Entertainment',
+                'Medical',
+                'Investments',
+                'Transportation',
+                'Fuel',
+                'Repairs and Maintenance',
+                'Others'
+            ];
+
+            categoryRows.sort((a, b) => {
+                let indexA = customOrder.indexOf(a.category);
+                let indexB = customOrder.indexOf(b.category);
+                if (indexA === -1) indexA = 999;
+                if (indexB === -1) indexB = 999;
+                if (indexA !== indexB) {
+                    return indexA - indexB;
+                }
+                return b.curr - a.curr;
+            });
+
+            const tbody = document.getElementById('comparison-table-body');
+            tbody.innerHTML = '';
+
+            if (categoryRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">No category data found for these months.</td></tr>`;
+                document.getElementById('comparison-table-foot').innerHTML = '';
+                return;
+            }
+
+            categoryRows.forEach(row => {
+                const absChange = row.curr - row.prev;
+                let badgeClass = 'text-slate-600 bg-slate-100';
+                let iconHtml = '<i class="fa-solid fa-minus mr-0.5"></i>';
+
+                if (absChange > 0) {
+                    badgeClass = 'text-rose-700 bg-rose-50';
+                    iconHtml = '<i class="fa-solid fa-arrow-trend-up mr-0.5 text-rose-600"></i>';
+                } else if (absChange < 0) {
+                    badgeClass = 'text-emerald-700 bg-emerald-50';
+                    iconHtml = '<i class="fa-solid fa-arrow-trend-down mr-0.5 text-emerald-600"></i>';
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                // Current month (currMonthKey) before previous month (prevMonthKey)
+                tr.innerHTML = `
+                    <td class="px-2 py-2 sm:px-6 sm:py-3.5 font-medium text-slate-950 truncate max-w-[110px] sm:max-w-none" title="${row.category}">${row.category}</td>
+                    <td class="px-2 py-2 sm:px-6 sm:py-3.5 text-right font-semibold text-slate-900">${formatCurrency(row.curr)}</td>
+                    <td class="px-2 py-2 sm:px-6 sm:py-3.5 text-right text-slate-600">${formatCurrency(row.prev)}</td>
+                    <td class="px-2 py-2 sm:px-6 sm:py-3.5 text-right">
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] sm:text-xs font-semibold ${badgeClass}">
+                            ${iconHtml} ${row.pctChange > 0 && row.prev > 0 ? '+' : ''}${row.pctChange.toFixed(1)}%
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const totalAbsChange = totalCurr - totalPrev;
+            let totalPctChange = totalPrev > 0 ? (totalAbsChange / totalPrev) * 100 : (totalCurr > 0 ? 100 : 0);
+
+            let totalBadgeClass = 'text-slate-700 bg-slate-100';
+            let totalIconHtml = '<i class="fa-solid fa-minus mr-0.5"></i>';
+            if (totalAbsChange > 0) {
+                totalBadgeClass = 'text-rose-700 bg-rose-50';
+                totalIconHtml = '<i class="fa-solid fa-arrow-trend-up mr-0.5 text-rose-600"></i>';
+            } else if (totalAbsChange < 0) {
+                totalBadgeClass = 'text-emerald-700 bg-emerald-50';
+                totalIconHtml = '<i class="fa-solid fa-arrow-trend-down mr-0.5 text-emerald-600"></i>';
+            }
+
+            const tfoot = document.getElementById('comparison-table-foot');
+            tfoot.innerHTML = `
+                <tr>
+                    <td class="px-2 py-2 sm:px-6 sm:py-3.5 text-slate-900 font-bold">Total</td>
+                    <td class="px-2 py-2 sm:px-6 sm:py-3.5 text-right text-slate-900 font-bold">${formatCurrency(totalCurr)}</td>
+                    <td class="px-2 py-2 sm:px-6 sm:py-3.5 text-right text-slate-900 font-bold">${formatCurrency(totalPrev)}</td>
+                    <td class="px-2 py-2 sm:px-6 sm:py-3.5 text-right">
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] sm:text-xs font-semibold ${totalBadgeClass}">
+                            ${totalIconHtml} ${totalPctChange > 0 && totalPrev > 0 ? '+' : ''}${totalPctChange.toFixed(1)}%
+                        </span>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function renderTransactionsTable() {
+            const tbody = document.getElementById('transactions-table-body');
+            document.getElementById('tx-count-badge').textContent = `${filteredTransactions.length} tx`;
+            tbody.innerHTML = '';
+
+            if (filteredTransactions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-3 py-6 text-center text-slate-400">No transactions match your current filters.</td></tr>`;
+                return;
+            }
+
+            const sortedTx = [...filteredTransactions].sort((a, b) => b.date - a.date);
+
+            sortedTx.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+
+                // Format: Date, Category, Amount, Remarks
+                tr.innerHTML = `
+                    <td class="px-3 py-2.5 sm:px-6 sm:py-3.5 text-slate-600 font-mono text-[11px] sm:text-sm whitespace-nowrap w-24 sm:w-36">${t.dateFormattedFull}</td>
+                    <td class="px-3 py-2.5 sm:px-6 sm:py-3.5 whitespace-nowrap w-28 sm:w-44">
+                        <span class="bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded text-[11px] sm:text-sm inline-block truncate max-w-[90px] sm:max-w-none align-middle" title="${t.category}">${t.category}</span>
+                    </td>
+                    <td class="px-3 py-2.5 sm:px-6 sm:py-3.5 text-right font-bold text-slate-900 text-[11px] sm:text-sm whitespace-nowrap w-24 sm:w-32">${formatCurrency(t.amount)}</td>
+                    <td class="px-4 py-2.5 sm:px-6 sm:py-3.5 text-slate-600 text-xs sm:text-sm whitespace-nowrap">${t.remarks || '<span class="text-slate-400 italic">-</span>'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
 </body>
 </html>
